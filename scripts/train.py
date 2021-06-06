@@ -370,7 +370,7 @@ def setup_training_loop_kwargs(
     }
 
     assert resume is None or isinstance(resume, str)
-    if resume is None:
+    if resume is None or resume == 'None':
         resume = 'noresume'
     elif resume == 'noresume':
         desc += '-noresume'
