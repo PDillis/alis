@@ -42,10 +42,9 @@ train_args:
   kimg: 10000
 
   # Let's by default have only x flips
-  aug: noaug  # Choose between ['noaug'|'ada'|'fixed']
+  aug: noaug  # Choose between ['noaug'|'ada']
   target: 0.2  # Only for aug type 'ada'
   augpipe: 'bgc'  # Only for aug type 'ada'
-  p: 0.2  # Only for aug type 'fixed'
   mirror: 1  # Horizontal mirroring (along y axis)
   z_dim: 512
   w_dim: 512
