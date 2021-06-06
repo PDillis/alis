@@ -24,12 +24,15 @@ from torch_utils.ops import grid_sample_gradfix
 import legacy
 from metrics import metric_main
 
-#----------------------------------------------------------------------------
 
-def setup_snapshot_image_grid(training_set, random_seed=0):
+# ----------------------------------------------------------------------------
+
+
+def setup_snapshot_image_grid(training_set, snap_res = '8k', random_seed=0):
+    size_dict = {'1080p': (1920, 1080, 3, 2), '4k': (3840, 2160, 7, 4), '8k': (7680, 4320, 7, 4)}
     rnd = np.random.RandomState(random_seed)
-    gw = np.clip(7680 // training_set.image_shape[2], 7, 32)
-    gh = np.clip(4320 // training_set.image_shape[1], 4, 32)
+    gw = np.clip(size_dict[snap_res][0] // training_set.image_shape[2], size_dict[snap_res][2], 32)
+    gh = np.clip(size_dict[snap_res][1] // training_set.image_shape[1], size_dict[snap_res][3], 32)
 
     # No labels => show random subset of training samples.
     if not training_set.has_labels:
@@ -63,7 +66,9 @@ def setup_snapshot_image_grid(training_set, random_seed=0):
 
     return (gw, gh), samples
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
+
 
 def save_image_grid(img, fname, drange, grid_size):
     lo, hi = drange
@@ -83,7 +88,9 @@ def save_image_grid(img, fname, drange, grid_size):
     if C == 3:
         PIL.Image.fromarray(img, 'RGB').save(fname)
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
+
 
 def training_loop(
     run_dir                 = '.',      # Output directory.
@@ -113,6 +120,7 @@ def training_loop(
     kimg_per_tick           = 4,        # Progress snapshot interval.
     image_snapshot_ticks    = 50,       # How often to save image snapshots? None = disable.
     network_snapshot_ticks  = 500,      # How often to save network snapshots? None = disable.
+    snap_res                = '8k',     # Resolution size of snapshot grid; choose between 1080p | 4k | 8k
     resume_pkl              = None,     # Network pickle to resume training from.
     cudnn_benchmark         = True,     # Enable torch.backends.cudnn.benchmark?
     abort_fn                = None,     # Callback function for determining whether to abort training. Must return consistent results across ranks.
@@ -238,14 +246,14 @@ def training_loop(
 
     if rank == 0:
         print('Exporting sample images...')
-        grid_size, samples = setup_snapshot_image_grid(training_set=training_set)
+        grid_size, samples = setup_snapshot_image_grid(training_set=training_set, snap_res=snap_res)
         images = np.stack([s['image'] for s in samples])
         labels = np.stack([s.get('label', s.get('embedding', 0)) for s in samples])
-        save_image_grid(images, os.path.join(run_dir, 'reals.jpg'), drange=[0,255], grid_size=grid_size)
+        save_image_grid(images, os.path.join(run_dir, 'reals.jpg'), drange=[0, 255], grid_size=grid_size)
         grid_z = torch.randn([len(samples), G.z_dim], device=device).split(batch_gpu)
         grid_c = torch.from_numpy(labels).to(device).split(batch_gpu)
         images = torch.cat([G_ema(z=z, c=c, noise_mode='const').cpu() for z, c in zip(grid_z, grid_c)]).numpy()
-        save_image_grid(images, os.path.join(run_dir, 'fakes_init.jpg'), drange=[-1,1], grid_size=grid_size)
+        save_image_grid(images, os.path.join(run_dir, 'fakes_init.jpg'), drange=[-1, 1], grid_size=grid_size)
 
     # Initialize logs.
     if rank == 0:

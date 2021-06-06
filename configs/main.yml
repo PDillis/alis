@@ -28,13 +28,15 @@ project_release_dir:
   experiment_name: ${experiment_name}
 
 train_args:
+  # All the configs found in scripts/train.py, line 464 onwards
   outdir: ${project_release_dir}
   data: ${env.data_dir}/${dataset}.zip
   gpus: ${num_gpus}
-  cfg: auto
+  cfg: auto  # Choose between [auto|stylegan2|paper256|paper512|paper1024|cifar|24gb-2gpu|24gb-4gpu]
   g_fmaps: 0.5
   d_fmaps: 0.5
   snap: 100
+  resume: None  # Resume from a previous run (path to network.pkl)
 
   # Let's by default have only x flips
   aug: noaug

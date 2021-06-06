@@ -36,6 +36,7 @@ def setup_training_loop_kwargs(
     # General options (not included in desc).
     gpus       = None, # Number of GPUs: <int>, default = 1 gpu
     snap       = None, # Snapshot interval: <int>, default = 50 ticks
+    snap_res   = None, # Snapshot resolution [1080p|4k|8k]
     metrics    = None, # List of metric names: [], ['fid50k_full'] (default), ...
     seed       = None, # Random seed: <int>, default = 0
 
@@ -100,6 +101,8 @@ def setup_training_loop_kwargs(
         raise UserError('--snap must be at least 1')
     args.image_snapshot_ticks = snap
     args.network_snapshot_ticks = snap
+
+    args.snap_res = '8k' if snap_res is None else snap_res
 
     if metrics is None:
         metrics = ['fid50k_full']
@@ -190,12 +193,14 @@ def setup_training_loop_kwargs(
     desc += f'-{cfg}'
 
     cfg_specs = {
-        'auto':      dict(ref_gpus=-1, kimg=25000,  mb=-1, mbstd=-1, g_fmaps=-1,  d_fmaps=-1,  lrate=-1,     gamma=-1,   ema=-1,  ramp=0.05, map=2), # Populated dynamically based on resolution and GPU count.
-        'stylegan2': dict(ref_gpus=8,  kimg=25000,  mb=32, mbstd=4,  g_fmaps=1,   d_fmaps=1,   lrate=0.002,  gamma=10,   ema=10,  ramp=None, map=8), # Uses mixed-precision, unlike the original StyleGAN2.
+        'auto':      dict(ref_gpus=-1, kimg=25000,  mb=-1, mbstd=-1, g_fmaps=-1,  d_fmaps=-1,  lrate=-1,     gamma=-1,   ema=-1,  ramp=0.05, map=2),  # Populated dynamically based on resolution and GPU count.
+        'stylegan2': dict(ref_gpus=8,  kimg=25000,  mb=32, mbstd=4,  g_fmaps=1,   d_fmaps=1,   lrate=0.002,  gamma=10,   ema=10,  ramp=None, map=8),  # Uses mixed-precision, unlike the original StyleGAN2.
         'paper256':  dict(ref_gpus=8,  kimg=25000,  mb=64, mbstd=8,  g_fmaps=0.5, d_fmaps=0.5, lrate=0.0025, gamma=1,    ema=20,  ramp=None, map=8),
         'paper512':  dict(ref_gpus=8,  kimg=25000,  mb=64, mbstd=8,  g_fmaps=1,   d_fmaps=1,   lrate=0.0025, gamma=0.5,  ema=20,  ramp=None, map=8),
         'paper1024': dict(ref_gpus=8,  kimg=25000,  mb=32, mbstd=4,  g_fmaps=1,   d_fmaps=1,   lrate=0.002,  gamma=2,    ema=10,  ramp=None, map=8),
         'cifar':     dict(ref_gpus=2,  kimg=100000, mb=64, mbstd=32, g_fmaps=1,   d_fmaps=1,   lrate=0.0025, gamma=0.01, ema=500, ramp=0.05, map=2),
+        '24gb-2gpu': dict(ref_gpus=2,  kimg=25000,  mb=32, mbstd=16, g_fmaps=1,   d_fmaps=1,   lrate=0.002,  gamma=10,   ema=10,  ramp=None, map=8),  # Made for 512x512 imgs, adapted from @dvschultz repo
+        '24gb-2gpu': dict(ref_gpus=2,  kimg=25000,  mb=64, mbstd=16, g_fmaps=1,   d_fmaps=1,   lrate=0.002,  gamma=10,   ema=10,  ramp=None, map=8),  # Made for 512x512 imgs, adapted from @dvschultz repo
     }
 
     assert cfg in cfg_specs
@@ -459,9 +464,10 @@ class CommaSeparatedList(click.ParamType):
 @click.pass_context
 
 # General options.
-@click.option('--outdir', help='Where to save the results', required=True, metavar='DIR')
-@click.option('--gpus', help='Number of GPUs to use [default: 1]', type=int, metavar='INT')
-@click.option('--snap', help='Snapshot interval [default: 50 ticks]', type=int, metavar='INT')
+@click.option('--outdir', help='Where to save the results', type=click.Path(file_okay=False), required=True, metavar='DIR')
+@click.option('--gpus', help='Number of GPUs to use', type=click.IntRange(min=1, max=8), default=1, show_default=True, metavar='INT')
+@click.option('--snap', help='Snapshot interval', type=int, default=50, show_default=True, metavar='INT')
+@click.option('--snap-res', help='Image snapshot resolution', type=click.Choice(['1080p', '4k', '8k']), default='8k', show_default=True)
 @click.option('--metrics', help='Comma-separated list or "none" [default: fid50k_full]', type=CommaSeparatedList())
 @click.option('--seed', help='Random seed [default: 0]', type=int, metavar='INT')
 @click.option('-n', '--dry-run', help='Print training options and exit', is_flag=True)
@@ -471,9 +477,9 @@ class CommaSeparatedList(click.ParamType):
 @click.option('--cond', help='Train conditional model based on dataset labels [default: false]', type=bool, metavar='BOOL')
 @click.option('--subset', help='Train with only N images [default: all]', type=int, metavar='INT')
 @click.option('--mirror', help='Enable dataset x-flips [default: false]', type=bool, metavar='BOOL')
-
+# TODO: add mirror-y
 # Base config.
-@click.option('--cfg', help='Base config [default: auto]', type=click.Choice(['auto', 'stylegan2', 'paper256', 'paper512', 'paper1024', 'cifar']))
+@click.option('--cfg', help='Base config [default: auto]', type=click.Choice(['auto', 'stylegan2', 'paper256', 'paper512', 'paper1024', 'cifar', '24gb-2gpu', '24gb-4gpu']))
 @click.option('--kimg', help='Override training duration', type=int, metavar='INT')
 @click.option('--batch', help='Override batch size', type=int, metavar='INT')
 
