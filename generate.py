@@ -37,6 +37,7 @@ def main():
 # TODO: add resize option for final image
 # TODO: come back to the first image (loop)
 # TODO: let users decide either the video-step-size or video-length (in seconds)
+# TODO: allow for more complex aspect ratios
 @main.command(name='panorama')  # For now its own function apart from main, as more will be added below
 @click.pass_context
 @click.option('--network', 'network_pkl', help='Network pickle filename', required=True)
@@ -48,7 +49,7 @@ def main():
 # Video options
 @click.option('--save-video', is_flag=True, help='Add flag to save a video')
 @click.option('--video-height', 'frame_size', type=click.IntRange(min=1), help='Output height of the video (will use the original height by default)', default=None)
-@click.option('--aspect-ratio', type=click.IntRange(min=1), help='Width to height ratio of the video (vertical is 1, this onlycontrols horizontal)', default=4, show_default=True)
+@click.option('--aspect-ratio', type=click.IntRange(min=1), help='Width to height ratio of the video (take vertical as 1, this only controls horizontal)', default=4, show_default=True)
 @click.option('--video-step-size', 'step_size', type=click.IntRange(min=1), help='Camera movement speed: how many pixels to move from frame to frame', default=2, show_default=True)
 @click.option('--video-fps', 'fps', type=click.IntRange(min=1), help='Video FPS (the lower, the slower to traverse the image and viceversa)', default=40, show_default=True)
 @click.option('--compress-video', 'compress', help='Add flag to compress the final mp4 file with ffmpeg-python (same resolution, lower file size)', is_flag=True)
@@ -70,7 +71,7 @@ def panorama(
     """
     Example:
         python generate.py panorama --network=https://kaust-cair.s3.amazonaws.com/alis/lhq1024-snapshot.pkl --seed=0 \\
-            --num-frames=20 --trunc=0.7
+            --num-frames=20 --trunc=0.7 --save-video --compress-video --video-height=256 --video-fps=40
     """
     # Set the seed
     np.random.seed(seed)
