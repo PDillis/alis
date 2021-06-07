@@ -49,7 +49,7 @@ def main():
 # Video options
 @click.option('--save-video', is_flag=True, help='Add flag to save a video')
 @click.option('--video-height', 'frame_size', type=click.IntRange(min=1), help='Output height of the video (will use the original height by default)', default=None)
-@click.option('--aspect-ratio', type=click.IntRange(min=1), help='Width to height ratio of the video (take vertical as 1, this only controls horizontal)', default=4, show_default=True)
+@click.option('--aspect-ratio', type=click.IntRange(min=1), help='Width to height ratio of the video (take vertical as 1, this only controls horizontal)', default=3, show_default=True)
 @click.option('--video-step-size', 'step_size', type=click.IntRange(min=1), help='Camera movement speed: how many pixels to move from frame to frame', default=2, show_default=True)
 @click.option('--video-fps', 'fps', type=click.IntRange(min=1), help='Video FPS (the lower, the slower to traverse the image and viceversa)', default=40, show_default=True)
 @click.option('--compress-video', 'compress', help='Add flag to compress the final mp4 file with ffmpeg-python (same resolution, lower file size)', is_flag=True)
