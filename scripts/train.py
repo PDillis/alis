@@ -209,7 +209,7 @@ def setup_training_loop_kwargs(
         desc += f'{gpus:d}'
         spec.ref_gpus = gpus
         res = args.training_set_kwargs.resolution
-        spec.mb = 2 * max(min(gpus * min(4096 // res, 32), 64), gpus) # keep gpu memory consumption at bay
+        spec.mb = max(min(gpus * min(4096 // res, 32), 64), gpus) # keep gpu memory consumption at bay
         spec.mbstd = min(spec.mb // gpus, 4) # other hyperparams behave more predictably if mbstd group size remains fixed
         spec.g_fmaps = 1 if res >= 512 else 0.5
         spec.d_fmaps = 1 if res >= 512 else 0.5
