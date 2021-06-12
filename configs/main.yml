@@ -36,8 +36,8 @@ train_args:
   g_fmaps: 0.5
   d_fmaps: 0.5
   snap: 100
-  img_snap: 5
-  snap_res: '8k'
+  img-snap: 5
+  snap-res: '8k'
   seed: 0
   resume: None  # Resume from a previous run (path to network.pkl)
   kimg: 10000
