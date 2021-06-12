@@ -36,6 +36,7 @@ def setup_training_loop_kwargs(
     # General options (not included in desc).
     gpus       = None, # Number of GPUs: <int>, default = 1 gpu
     snap       = None, # Snapshot interval: <int>, default = 50 ticks
+    img_snap   = None, # Image snapshot interval: <int>, default = 50 ticks
     snap_res   = None, # Snapshot resolution [1080p|4k|8k]
     metrics    = None, # List of metric names: [], ['fid50k_full'] (default), ...
     seed       = None, # Random seed: <int>, default = 0
@@ -99,8 +100,12 @@ def setup_training_loop_kwargs(
     assert isinstance(snap, int)
     if snap < 1:
         raise UserError('--snap must be at least 1')
-    args.image_snapshot_ticks = snap
     args.network_snapshot_ticks = snap
+
+    assert isinstance(img_snap, int)
+    if snap < 1:
+        raise UserError('--img-snap must be at least 1')
+    args.image_snapshot_ticks = img_snap
 
     args.snap_res = '8k' if snap_res is None else snap_res
 
@@ -209,7 +214,10 @@ def setup_training_loop_kwargs(
         desc += f'{gpus:d}'
         spec.ref_gpus = gpus
         res = args.training_set_kwargs.resolution
-        spec.mb = max(min(gpus * min(4096 // res, 32), 64), gpus) # keep gpu memory consumption at bay
+        spec.mb = 4 * max(min(gpus * min(4096 // res,
+                                         32),
+                              64),
+                          gpus) # keep gpu memory consumption at bay
         spec.mbstd = min(spec.mb // gpus, 4) # other hyperparams behave more predictably if mbstd group size remains fixed
         spec.g_fmaps = 1 if res >= 512 else 0.5
         spec.d_fmaps = 1 if res >= 512 else 0.5
@@ -463,7 +471,8 @@ class CommaSeparatedList(click.ParamType):
 @click.option('--outdir', help='Where to save the results', type=click.Path(file_okay=False), required=True, metavar='DIR')
 @click.option('--gpus', help='Number of GPUs to use', type=click.IntRange(min=1, max=8), default=1, show_default=True, metavar='INT')
 @click.option('--snap', help='Snapshot interval', type=int, default=50, show_default=True, metavar='INT')
-@click.option('--snap_res', help='Image snapshot resolution', type=click.Choice(['1080p', '4k', '8k']), default='8k', show_default=True)
+@click.option('--img-snap', 'img_snap', help='Image snapshot interval', type=int, default=50, show_default=True, metavar='INT')
+@click.option('--snap-res', 'snap_res', help='Image snapshot resolution', type=click.Choice(['1080p', '4k', '8k']), default='8k', show_default=True)
 @click.option('--metrics', help='Comma-separated list or "none" [default: fid50k_full]', type=CommaSeparatedList())
 @click.option('--seed', help='Random seed [default: 0]', type=int, metavar='INT')
 @click.option('-n', '--dry-run', help='Print training options and exit', is_flag=True)
