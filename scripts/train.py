@@ -198,14 +198,14 @@ def setup_training_loop_kwargs(
     desc += f'-{cfg}'
 
     cfg_specs = {
-        'auto':      dict(ref_gpus=-1, kimg=25000,  mb=-1, mbstd=-1, g_fmaps=-1,  d_fmaps=-1,  lrate=-1,     gamma=-1,   ema=-1,  ramp=None, map=8),  # Populated dynamically based on resolution and GPU count.
+        'auto':      dict(ref_gpus=-1, kimg=25000,  mb=-1, mbstd=-1, g_fmaps=-1,  d_fmaps=-1,  lrate=-1,     gamma=-1,   ema=-1,  ramp=None, map=2),  # Populated dynamically based on resolution and GPU count.
         'stylegan2': dict(ref_gpus=8,  kimg=25000,  mb=32, mbstd=4,  g_fmaps=1,   d_fmaps=1,   lrate=0.002,  gamma=10,   ema=10,  ramp=None, map=8),  # Uses mixed-precision, unlike the original StyleGAN2.
         'paper256':  dict(ref_gpus=8,  kimg=25000,  mb=64, mbstd=8,  g_fmaps=0.5, d_fmaps=0.5, lrate=0.0025, gamma=1,    ema=20,  ramp=None, map=8),
         'paper512':  dict(ref_gpus=8,  kimg=25000,  mb=64, mbstd=8,  g_fmaps=1,   d_fmaps=1,   lrate=0.0025, gamma=0.5,  ema=20,  ramp=None, map=8),
         'paper1024': dict(ref_gpus=8,  kimg=25000,  mb=32, mbstd=4,  g_fmaps=1,   d_fmaps=1,   lrate=0.002,  gamma=2,    ema=10,  ramp=None, map=8),
         'cifar':     dict(ref_gpus=2,  kimg=100000, mb=64, mbstd=32, g_fmaps=1,   d_fmaps=1,   lrate=0.0025, gamma=0.01, ema=500, ramp=0.05, map=2),
-        '24gb-2gpu': dict(ref_gpus=2,  kimg=25000,  mb=32, mbstd=16, g_fmaps=1,   d_fmaps=1,   lrate=0.002,  gamma=10,   ema=10,  ramp=None, map=8),  # Made for 512x512 imgs, adapted from @dvschultz repo
-        '24gb-4gpu': dict(ref_gpus=2,  kimg=25000,  mb=64, mbstd=16, g_fmaps=1,   d_fmaps=1,   lrate=0.002,  gamma=10,   ema=10,  ramp=None, map=8),  # Made for 512x512 imgs, adapted from @dvschultz repo
+        '24gb-2gpu': dict(ref_gpus=2,  kimg=25000,  mb=32, mbstd=16, g_fmaps=1,   d_fmaps=1,   lrate=0.002,  gamma=10,   ema=10,  ramp=None, map=8),  # Made for 512x512 imgs, adapted from @dvschultz SGAN2-ADA repo
+        '24gb-4gpu': dict(ref_gpus=2,  kimg=25000,  mb=64, mbstd=16, g_fmaps=1,   d_fmaps=1,   lrate=0.002,  gamma=10,   ema=10,  ramp=None, map=8),  # Made for 512x512 imgs, adapted from @dvschultz SGAN2-ADA repo
     }
 
     assert cfg in cfg_specs

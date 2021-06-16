@@ -73,7 +73,7 @@ def report_metric(result_dict, run_dir=None, snapshot_pkl=None):
     jsonl_line = json.dumps(dict(result_dict, snapshot_pkl=snapshot_pkl, timestamp=time.time()))
     print(jsonl_line)
     if run_dir is not None and os.path.isdir(run_dir):
-        with open(os.path.join(run_dir, f'metric-{metric}.json'), 'a') as f:
+        with open(os.path.join(run_dir, f'metric-{metric}.jsonl'), 'at') as f:
             f.write(jsonl_line + '\n')
 
 #----------------------------------------------------------------------------

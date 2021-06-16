@@ -32,23 +32,24 @@ train_args:
   outdir: ${project_release_dir}
   data: ${env.data_dir}/${dataset}.zip
   gpus: ${num_gpus}
-  cfg: auto  # Choose between [auto|stylegan2|paper256|paper512|paper1024|cifar|24gb-2gpu|24gb-4gpu]
-  g_fmaps: 0.5
-  d_fmaps: 0.5
-  snap: 100
-  img_snap: 5
-  snap_res: '8k'
-  seed: 0
-  resume: None  # Resume from a previous run (path to network.pkl)
-  kimg: 10000
+  cfg: auto        # Choose between [auto | stylegan2 | paper256 | paper512 | paper1024 | cifar | 24gb-2gpu | 24gb-4gpu]
+  g_fmaps: 0.5     # Multiplier for the channel_base for G
+  d_fmaps: 0.5     # Multiplier for the channel_base for D
+  snap: 100        # Save the .pkl file every `snap` ticks
+  img_snap: 5      # Save a random image snapshot every `img_snap` ticks
+  snap_res: 8k     # Resolution of the snapshot; choose from [1080p | 4k | 8k]
+  seed: 0          # Random seed to use
+  resume: None     # Resume from a previous run (path to network.pkl, or use 'lhq1024' to transfer learn from LHQ)
+  kimg: 5000       # How many kimg to train the model for (I doubt many will train above 5000, unless it's from scratch)
 
   # Let's by default have only x flips
-  aug: noaug  # Choose between ['noaug'|'ada']
-  target: 0.2  # Only for aug type 'ada'
-  augpipe: 'bgc'  # Only for aug type 'ada'
-  mirror: 1  # Horizontal mirroring (along y axis)
-  z_dim: 512
-  w_dim: 512
+  # TODO: add y flips, should be easy enough (famous last words)
+  aug: noaug       # Choose between [noaug | ada]
+  target: 0.2      # Only for aug type ada
+  augpipe: bgc     # Only for aug type ada
+  mirror: 1        # Horizontal mirroring (along y axis)
+  z_dim: 512       # Latent dimension of Z space
+  w_dim: 512       # Latent dimension of W space
 
   # By default, use ALIS config
   hydra_cfg_name: "alis.yml"
